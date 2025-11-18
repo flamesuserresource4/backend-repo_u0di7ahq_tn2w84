@@ -12,9 +12,9 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# Example schemas (kept for reference):
 
 class User(BaseModel):
     """
@@ -38,11 +38,37 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Restaurant app schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class MenuItem(BaseModel):
+    title: str = Field(..., description="Dish name")
+    description: Optional[str] = Field(None, description="Short description")
+    price: float = Field(..., ge=0, description="Price in dollars")
+    category: str = Field(..., description="Category such as Starters, Mains, Desserts")
+    image: Optional[str] = Field(None, description="Image URL")
+    is_veg: Optional[bool] = Field(None, description="Vegetarian option")
+
+class Reservation(BaseModel):
+    name: str
+    email: Optional[str] = None
+    phone: str
+    date: str = Field(..., description="ISO date string YYYY-MM-DD")
+    time: str = Field(..., description="Time like 19:30")
+    guests: int = Field(..., ge=1, le=20)
+    notes: Optional[str] = None
+
+class CartItem(BaseModel):
+    title: str
+    price: float
+    quantity: int = Field(..., ge=1, le=99)
+
+class Order(BaseModel):
+    name: str
+    phone: str
+    address: str
+    notes: Optional[str] = None
+    items: List[CartItem]
+    subtotal: float = Field(..., ge=0)
+    delivery_fee: float = Field(..., ge=0)
+    total: float = Field(..., ge=0)
+    status: str = Field("pending", description="pending, preparing, out_for_delivery, completed")
